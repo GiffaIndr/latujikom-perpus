@@ -24,6 +24,12 @@ class AuthController extends Controller
         return view('Auth.register');
     }
 
+    public function user()
+    {
+        $user = User::all();
+        return view('admin.user', compact('user'));
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -37,11 +43,16 @@ class AuthController extends Controller
             'password.exist' => 'password belum tersedia'
         ]);
         $user = $request->only('email', 'password');
-        if(Auth::attempt($user)) {
+        if (Auth::attempt($user)) {
             return redirect('/landing');
         } else {
             return redirect()->back()->with('gagalLogin', 'gagal login silahkan cek kembali');
         }
+    }
+    public function logout()
+    {
+        Auth::logout();
+        return redirect('/');
     }
 
     public function registerUser(Request $request)
@@ -51,6 +62,7 @@ class AuthController extends Controller
             'name' => 'required',
             'email' => 'required:email:dns',
             'nis' => 'required',
+            'address' => 'required',
             'password' => 'required',
         ]);
         User::create([
@@ -58,40 +70,62 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'nis' => $request->nis,
+            'address' => $request->address,
             'password' => $request->password
         ]);
         return redirect('/')->with('successregister', 'sukses menambah akun! silahkan login!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Auth $auth)
+    public function createUser(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required',
+            'password' => 'required',
+            'email' => 'required|email:dns',
+            'username' => 'required',
+            'nis' => 'required',
+            'address' => 'required',
+            'role' => 'required'
+        ]);
+        User::create([
+            'name' => $request->name,
+            'password' => $request->password,
+            'email' => $request->email,
+            'nis' => $request->nis,
+            'username' => $request->username,
+            'address' => $request->address,
+            'role' => $request->role
+        ]);
+        return redirect('/dashboard/user')->with('successUser', 'sukses menambah user');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Auth $auth)
+    public function update(Request $request, $id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Auth $auth)
-    {
-        //
+        $request->validate([
+            'name' => 'required',
+            'password' => 'required',
+            'email' => 'required|email:dns',
+            'username' => 'required',
+            'address' => 'required',
+            'nis' => 'required',
+        ]);
+        User::where('id', $id)->update([
+            'name' => $request->name,
+            'password' => $request->password,
+            'email' => $request->email,
+            'nis' => $request->nis,
+            'address' => $request->address,
+            'username' => $request->username,
+        ]);
+        return redirect('/dashboard/user')->with('successRegsiter', 'sukses register, silahkan login');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Auth $auth)
+    public function destroy($id)
     {
-        //
+        user::find($id)->delete();
+        return redirect('/dashboard/user')->with('successDelete', 'sukses delete user');
     }
 }

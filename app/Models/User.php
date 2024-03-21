@@ -17,8 +17,12 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-     protected $guarded = ['id'];
+    protected $guarded = ['id'];
 
+    public function pinjams()
+    {
+        return $this->hasMany(Pinjam::class, 'username', 'username');
+    }
     /**
      * The attributes that should be hidden for serialization.
      *
